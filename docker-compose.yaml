@@ -1,0 +1,38 @@
+networks:
+  go-server:
+    driver: bridge
+
+services:
+  
+  db:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    expose:
+      - 27017:27017
+    ports:
+      - "27017:27017" 
+    volumes:
+      - mongo-db:/data/db
+    networks:
+      - go-server
+
+  backend:
+    build: .
+    networks:
+      - go-server
+    ports:
+      - 8081:8081
+    environment:
+      DB_URL: "mongodb://root:example@db:27017"
+      GIN_MODE: "release"
+      # - DB_URL: mongodb://root:example@localhost:27017
+      DBNAME: "postmanData"
+      REQDATA: "reqData"
+      REQINFO: "reqInfo"
+      DOCKER: "yes"
+
+volumes:
+  mongo-db: 
