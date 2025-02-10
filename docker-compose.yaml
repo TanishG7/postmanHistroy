@@ -25,6 +25,7 @@ services:
       - go-server
     ports:
       - 8081:8081
+    restart: unless-stopped
     environment:
       DB_URL: "mongodb://root:example@db:27017"
       GIN_MODE: "release"

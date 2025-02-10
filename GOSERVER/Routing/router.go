@@ -8,5 +8,6 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.POST("/writeFile", handlers.WriteFile)
+	r.POST("/testCases", handlers.TestCases)
 	return r
 }

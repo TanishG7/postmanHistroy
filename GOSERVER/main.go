@@ -30,7 +30,7 @@ func main() {
 	r := routing.SetupRouter()
 	// Listen and Server in 0.0.0.0:8080
 	if os.Getenv("DOCKER") != "yes" {
-		r.Run(":8081")
+		r.Run(":8082")
 	} else {
 		r.Run(":8081")
 	}

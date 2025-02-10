@@ -69,7 +69,10 @@ func WriteFile(c *gin.Context) {
 	RequestInfo.Timestamp = time.Now()
 	RequestInfo.RequestType = inputParams["type"]
 	RequestInfo.RequestStatus, err = strconv.Atoi(inputParams["status"])
-	RequestInfo.ResponseTime, err = strconv.Atoi(inputParams["responsetime"])
+	_, ok := inputParams["responsetime"]
+	if ok {
+		RequestInfo.ResponseTime, err = strconv.Atoi(inputParams["responsetime"])
+	}
 	if err != nil {
 		output["message"] = "Failure4: " + err.Error()
 		output["status"] = "500"
