@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
-	"sync"
 	"time"
 
 	database "github.com/ghostcode-sys/m/v2/Database"
@@ -18,15 +18,13 @@ import (
 
 func TestCases(c *gin.Context) {
 	inputParams := ExtractParams(c)
-
-	var wg sync.WaitGroup
-
 	requestParams := make(map[string][]string)
 	for key, value := range inputParams {
 		if key != "url" {
 			requestParams[key] = strings.Split(value, ",")
-			requestParams[key] = append(requestParams[key], "")
-
+			if key != "method" {
+				requestParams[key] = append(requestParams[key], "")
+			}
 		}
 	}
 
@@ -46,67 +44,76 @@ func TestCases(c *gin.Context) {
 
 	CompleteResponse := make([]map[string]interface{}, 0)
 
-	fmt.Println("Total Cases: ", len(premutatedRequestParams))
-	for idx, requestParam := range premutatedRequestParams {
-		var goStatus, phpStatus int
-		var goResult, phpResult any
-		var goErr, phpErr error
+	permutationCount := len(premutatedRequestParams)
+	timeinSecond := fmt.Sprintf("%d seconds", permutationCount*2)
 
-		wg.Add(2)
-		if strings.ToUpper(requestParam["method"]) == "GET" {
-			delete(requestParam, "method")
-			go func() {
-				defer wg.Done()
-				goStatus, goResult, goErr = hitGetRequest(goUrl, requestParam)
-			}()
-			go func() {
-				defer wg.Done()
-				phpStatus, phpResult, phpErr = hitGetRequest(phpUrl, requestParam)
-			}()
-		} else if strings.ToUpper(requestParam["method"]) == "POST" {
-			delete(requestParam, "method")
-			go func() {
-				defer wg.Done()
+	newUUID, _ := exec.Command("uuidgen").Output()
+	newUUIDString := string(newUUID)
+
+	c.JSON(200, gin.H{
+		"Counts":           permutationCount,
+		"EstimatedTimeTOComplete": timeinSecond,
+		"id":                      newUUIDString,
+	})
+	go func() {
+		for idx, requestParam := range premutatedRequestParams {
+			var goStatus, phpStatus int
+			var goResult, phpResult any
+			var goErr, phpErr error
+
+			if requestParam["method"] == "" {
+				continue
+			}
+
+			if strings.ToUpper(requestParam["method"]) == "GET" {
+				delete(requestParam, "method")
+				if goUrl != "" {
+					goStatus, goResult, goErr = hitGetRequest(goUrl, requestParam)
+				}
+				if phpUrl != "" {
+					phpStatus, phpResult, phpErr = hitGetRequest(phpUrl, requestParam)
+				}
+			} else if strings.ToUpper(requestParam["method"]) == "POST" {
+				delete(requestParam, "method")
+
 				if goUrl != "" {
 					goStatus, goResult, goErr = hitPostRequest(goUrl, requestParam)
 				}
-			}()
-			go func() {
-				defer wg.Done()
 				if phpUrl != "" {
 					phpStatus, phpResult, phpErr = hitPostRequest(phpUrl, requestParam)
 				}
-			}()
-		}
-		wg.Wait()
-		goErrString, phpErrString := "", ""
-		if goErr != nil {
-			goErrString = goErr.Error()
-		}
-		if phpErr != nil {
-			phpErrString = phpErr.Error()
-		}
-		DataToStore := map[string]interface{}{
-			"goUrl":     goUrl,
-			"phpUrl":    phpUrl,
-			"goErr":     goErrString,
-			"phpErr":    phpErrString,
-			"goStatus":  goStatus,
-			"phpStatus": phpStatus,
-			"goResult":  goResult,
-			"phpResult": phpResult,
-		}
-		if idx == 10 {
-			break
-		}
-		fmt.Println("Case Running: ", idx)
-		StoreResult(DataToStore)
-		fmt.Println("Case stored: ", idx)
-		CompleteResponse = append(CompleteResponse, DataToStore)
-		time.Sleep(1 * time.Second)
+			}
+			goErrString, phpErrString := "", ""
+			if goErr != nil {
+				goErrString = goErr.Error()
+			}
+			if phpErr != nil {
+				phpErrString = phpErr.Error()
+			}
+			DataToStore := map[string]interface{}{
+				"goUrl":     goUrl,
+				"phpUrl":    phpUrl,
+				"goErr":     goErrString,
+				"phpErr":    phpErrString,
+				"goStatus":  goStatus,
+				"phpStatus": phpStatus,
+				"goResult":  goResult,
+				"phpResult": phpResult,
+				"params":    requestParam,
+				"enteredOn": time.Now(),
+				"api_group": newUUIDString,
+			}
+			if idx == 10 {
+				break
+			}
+			fmt.Println("Case Running: ", idx)
+			StoreResult(DataToStore)
+			fmt.Println("Case stored: ", idx)
+			CompleteResponse = append(CompleteResponse, DataToStore)
+			time.Sleep(1 * time.Second)
 
-	}
-	c.JSON(http.StatusOK, CompleteResponse)
+		}
+	}()
 }
 
 func generatePermutations(input map[string][]string) []map[string]string {

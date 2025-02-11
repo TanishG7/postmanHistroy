@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agressive Testing </title>
+    <link rel="stylesheet" href="Static/style.css">
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>FORM DATA</h2>
+        <div id="form">
+            <div class="row">
+                <input type="text" placeholder="Key" class="key" value="url" required>
+                <input type="text" placeholder="Value" class="value" required>
+                <button onclick="removeRow(this)">Remove</button>
+            </div>
+            <div class="row">
+                <input type="text" placeholder="Key" class="key" value="method" required>
+                <input type="text" placeholder="Value" class="value" required>
+                <button onclick="removeRow(this)">Remove</button>
+            </div>
+            <div class="row">
+                <input type="text" placeholder="Key" class="key">
+                <input type="text" placeholder="Value" class="value">
+                <button onclick="removeRow(this)">Remove</button>
+            </div>
+        </div>
+        <button onclick="addRow()">Add More</button>
+        <button onclick="submitData()">Submit</button>
+        <pre id="output"></pre>
+        <hr>
+    </div>
+    <h2>RESULT</h2>
+    <div class="resultCard" id="resultCard">
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module">
+        import { getDiff } from '/Static/getdiff.mjs';
+        window.getDiff = getDiff;
+    </script>
+    <script src="/Static/script.js"></script>
+</body>
+
+</html>

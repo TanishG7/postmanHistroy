@@ -7,7 +7,10 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
 	r.POST("/writeFile", handlers.WriteFile)
 	r.POST("/testCases", handlers.TestCases)
+	r.GET("/loadHtml", handlers.LoadHtml)
+	r.GET("/getData", handlers.FetchData)
 	return r
 }
