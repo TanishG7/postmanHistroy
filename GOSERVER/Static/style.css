@@ -24,51 +24,57 @@ body {
 }
 
 
-.resultCard{
+.resultCard {
     display: block;
     width: 100%;
 }
 
-.card{
+.card {
     margin: 20px;
     /* background-color: magenta; */
     padding: 5px;
     border-radius: 5px;
     border: 4px solid gray;
 }
-.result{
+
+.result {
     display: flex;
     justify-content: space-around;
     margin: 40px 20px;
 }
 
-.goResult, .phpResult,.requestParams, .difference{
+.goResult,
+.phpResult,
+.requestParams,
+.difference {
     padding: 10px;
     width: 45%;
     border-radius: 10px;
     /* box-shadow: 0 0 10px 7px grey; */
 }
 
-h3{
+h3 {
     text-align: center;
 }
 
-pre{
-    background-color: rgba(85, 179, 85, 0.441);
-}
+
 .key {
     color: #e06c75;
     font-weight: 600;
 }
+
 .string {
     color: #d0a144;
 }
+
 .number {
     color: #2941da;
 }
+
 .boolean {
     color: #56b6c2;
 }
+
 .null {
     color: #c678dd;
 }
@@ -79,4 +85,8 @@ pre {
     border-radius: 10px;
     box-shadow: 0 0 10px 5px #8080809c;
     backdrop-filter: blur(6px);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 15px;
 }

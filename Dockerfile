@@ -10,10 +10,13 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build .
 
 FROM alpine:latest
 
+RUN apk add --no-cache util-linux
+
 WORKDIR /www
 
 COPY --from=builder /www/var/GOSERVER . 
 
 RUN ["chmod", "777", "./build"]
 
-CMD ["./build", ">", "./logfile.log", "2>&1"]
+CMD ["/bin/sh", "-c", "./build > ./logfile.log 2>&1"]
+# CMD ["./build", ">", "./logfile.log", "2>&1"]

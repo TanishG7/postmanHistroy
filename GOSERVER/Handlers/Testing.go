@@ -51,12 +51,13 @@ func TestCases(c *gin.Context) {
 	newUUIDString := string(newUUID)
 
 	c.JSON(200, gin.H{
-		"Counts":           permutationCount,
+		"Counts":                  permutationCount,
 		"EstimatedTimeTOComplete": timeinSecond,
 		"id":                      newUUIDString,
 	})
 	go func() {
 		for idx, requestParam := range premutatedRequestParams {
+			fmt.Println(requestParam)
 			var goStatus, phpStatus int
 			var goResult, phpResult any
 			var goErr, phpErr error
@@ -90,6 +91,9 @@ func TestCases(c *gin.Context) {
 			if phpErr != nil {
 				phpErrString = phpErr.Error()
 			}
+
+			fmt.Println(goErrString, goResult, goStatus)
+			fmt.Println(phpErrString, phpResult, phpStatus)
 			DataToStore := map[string]interface{}{
 				"goUrl":     goUrl,
 				"phpUrl":    phpUrl,
@@ -103,11 +107,9 @@ func TestCases(c *gin.Context) {
 				"enteredOn": time.Now(),
 				"api_group": newUUIDString,
 			}
-			if idx == 10 {
-				break
-			}
 			fmt.Println("Case Running: ", idx)
-			StoreResult(DataToStore)
+			res, storeErr := StoreResult(DataToStore)
+			fmt.Println("Result:", res, storeErr)
 			fmt.Println("Case stored: ", idx)
 			CompleteResponse = append(CompleteResponse, DataToStore)
 			time.Sleep(1 * time.Second)
@@ -228,7 +230,7 @@ func hitGetRequest(url string, params map[string]string) (int, any, error) {
 
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return 0, data, err
+		return 0, string(body), err
 	}
 
 	return resp.StatusCode, data, nil
@@ -270,10 +272,10 @@ func hitPostRequest(url string, params map[string]string) (int, any, error) {
 	err = json.Unmarshal(body, &returnData)
 
 	if err != nil {
-		return 0, returnData, err
+		return 0, responseStr, err
 	}
 
-	return resp.StatusCode, responseStr, nil
+	return resp.StatusCode, returnData, nil
 }
 
 func StoreResult(result map[string]interface{}) (string, error) {

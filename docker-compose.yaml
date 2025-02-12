@@ -34,6 +34,7 @@ services:
       REQDATA: "reqData"
       REQINFO: "reqInfo"
       DOCKER: "yes"
+      TESTDATA: "testData"
 
 volumes:
   mongo-db: 
