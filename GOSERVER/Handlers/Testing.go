@@ -69,19 +69,23 @@ func TestCases(c *gin.Context) {
 			if strings.ToUpper(requestParam["method"]) == "GET" {
 				delete(requestParam, "method")
 				if goUrl != "" {
-					goStatus, goResult, goErr = hitGetRequest(goUrl, requestParam)
+					newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
+					goStatus, goResult, goErr = hitGetRequest(newGoUrl, requestParam)
 				}
 				if phpUrl != "" {
-					phpStatus, phpResult, phpErr = hitGetRequest(phpUrl, requestParam)
+					newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
+					phpStatus, phpResult, phpErr = hitGetRequest(newPhpUrl, requestParam)
 				}
 			} else if strings.ToUpper(requestParam["method"]) == "POST" {
 				delete(requestParam, "method")
 
 				if goUrl != "" {
-					goStatus, goResult, goErr = hitPostRequest(goUrl, requestParam)
+					newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
+					goStatus, goResult, goErr = hitPostRequest(newGoUrl, requestParam)
 				}
 				if phpUrl != "" {
-					phpStatus, phpResult, phpErr = hitPostRequest(phpUrl, requestParam)
+					newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
+					phpStatus, phpResult, phpErr = hitPostRequest(newPhpUrl, requestParam)
 				}
 			}
 			goErrString, phpErrString := "", ""

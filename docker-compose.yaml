@@ -35,6 +35,8 @@ services:
       REQINFO: "reqInfo"
       DOCKER: "yes"
       TESTDATA: "testData"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   mongo-db: 
