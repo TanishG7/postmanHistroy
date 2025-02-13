@@ -96,7 +96,7 @@ function addRow() {
     row.classList.add("row");
     row.innerHTML = `
         <input type="text" placeholder="Key" class="key">
-        <input type="text" placeholder="Value" class="value">
+        <textarea type="text" placeholder="Value" class="value"></textarea>
         <button onclick="removeRow(this)">Remove</button>
     `;
     document.getElementById("form").appendChild(row);
