@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
 	database "github.com/ghostcode-sys/m/v2/Database"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -47,8 +48,8 @@ func TestCases(c *gin.Context) {
 	permutationCount := len(premutatedRequestParams)
 	timeinSecond := fmt.Sprintf("%d seconds", permutationCount*2)
 
-	newUUID, _ := exec.Command("uuidgen").Output()
-	newUUIDString := string(newUUID)
+	newUUID := uuid.New()
+	newUUIDString := newUUID.String()
 
 	c.JSON(200, gin.H{
 		"Counts":                  permutationCount,
@@ -69,23 +70,27 @@ func TestCases(c *gin.Context) {
 			if strings.ToUpper(requestParam["method"]) == "GET" {
 				delete(requestParam, "method")
 				if goUrl != "" {
-					newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
-					goStatus, goResult, goErr = hitGetRequest(newGoUrl, requestParam)
+					// newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
+					// goStatus, goResult, goErr = hitGetRequest(newGoUrl, requestParam)
+					goStatus, goResult, goErr = hitGetRequest(goUrl, requestParam)
 				}
 				if phpUrl != "" {
-					newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
-					phpStatus, phpResult, phpErr = hitGetRequest(newPhpUrl, requestParam)
+					// newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
+					// phpStatus, phpResult, phpErr = hitGetRequest(newPhpUrl, requestParam)
+					phpStatus, phpResult, phpErr = hitGetRequest(phpUrl, requestParam)
 				}
 			} else if strings.ToUpper(requestParam["method"]) == "POST" {
 				delete(requestParam, "method")
 
 				if goUrl != "" {
 					newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
-					goStatus, goResult, goErr = hitPostRequest(newGoUrl, requestParam)
+					goStatus, goResult, goErr = hitPostRequestNew(newGoUrl, requestParam)
+					// goStatus, goResult, goErr = hitPostRequestNew(goUrl, requestParam)
 				}
 				if phpUrl != "" {
 					newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
-					phpStatus, phpResult, phpErr = hitPostRequest(newPhpUrl, requestParam)
+					phpStatus, phpResult, phpErr = hitPostRequestNew(newPhpUrl, requestParam)
+					// phpStatus, phpResult, phpErr = hitPostRequestNew(phpUrl, requestParam)
 				}
 			}
 			goErrString, phpErrString := "", ""
@@ -258,7 +263,51 @@ func hitPostRequest(url string, params map[string]string) (int, any, error) {
 		return 0, returnData, err
 	}
 
-	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, returnData, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, returnData, err
+	}
+
+	responseStr = string(body)
+
+	err = json.Unmarshal(body, &returnData)
+
+	if err != nil {
+		return 0, responseStr, err
+	}
+
+	return resp.StatusCode, returnData, nil
+}
+
+func hitPostRequestNew(hiturl string, params map[string]string) (int, any, error) {
+	defer PanicHandler(true, false, "Panic error encountered in ApiPostPlainTextQueryFunction!")
+	jsonData := url.Values{}
+
+	for key, value := range params {
+		jsonData.Set(key, value)
+	}
+	var returnData interface{}
+	responseStr := ""
+	timeout := 3 * time.Second
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	req, err := http.NewRequest("POST", hiturl, strings.NewReader(jsonData.Encode()))
+	if err != nil {
+		return 0, returnData, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := client.Do(req)
 	if err != nil {
