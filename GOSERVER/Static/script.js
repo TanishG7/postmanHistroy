@@ -95,7 +95,7 @@ function addRow() {
     const row = document.createElement("div");
     row.classList.add("row");
     row.innerHTML = `
-        <input type="text" placeholder="Key" class="key">
+        <input type="text" placeholder="Key" class="Inp-key">
         <textarea type="text" placeholder="Value" class="value"></textarea>
         <button onclick="removeRow(this)">Remove</button>
     `;
@@ -108,9 +108,12 @@ function removeRow(button) {
 
 
 function submitData() {
-    const keys = document.querySelectorAll(".key");
+    const keys = document.querySelectorAll(".Inp-key");
     const values = document.querySelectorAll(".value");
     let data = {};
+
+    console.log("data", keys)
+    console.log("data", values)
 
     keys.forEach((key, index) => {
         const keyValue = key.value.trim();
@@ -119,6 +122,8 @@ function submitData() {
             data[keyValue] = value;
         }
     });
+
+    
 
     let url = "http://localhost:8081/testCases"
     axios.post(url, data, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(response => {

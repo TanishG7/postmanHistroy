@@ -33,12 +33,12 @@ func TestCases(c *gin.Context) {
 
 	goUrl, phpUrl := "", ""
 
-	for _, url := range urlArr {
-		if strings.Contains(url, "/go/") {
-			goUrl = strings.Trim(url, " ")
-		} else {
-			phpUrl = strings.Trim(url, " ")
-		}
+	if strings.Contains(urlArr[0], "/go/") {
+		goUrl = strings.Trim(urlArr[0], " ")
+		phpUrl = strings.Trim(urlArr[1], " ")
+	} else {
+		goUrl = strings.Trim(urlArr[1], " ")
+		phpUrl = strings.Trim(urlArr[0], " ")
 	}
 
 	premutatedRequestParams := generatePermutations(requestParams)
@@ -70,14 +70,14 @@ func TestCases(c *gin.Context) {
 			if strings.ToUpper(requestParam["method"]) == "GET" {
 				delete(requestParam, "method")
 				if goUrl != "" {
-					// newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
-					// goStatus, goResult, goErr = hitGetRequest(newGoUrl, requestParam)
-					goStatus, goResult, goErr = hitGetRequest(goUrl, requestParam)
+					newGoUrl := strings.Replace(goUrl, "localhost", "host.docker.internal", 1)
+					goStatus, goResult, goErr = hitGetRequest(newGoUrl, requestParam)
+					// goStatus, goResult, goErr = hitGetRequest(goUrl, requestParam)
 				}
 				if phpUrl != "" {
-					// newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
-					// phpStatus, phpResult, phpErr = hitGetRequest(newPhpUrl, requestParam)
-					phpStatus, phpResult, phpErr = hitGetRequest(phpUrl, requestParam)
+					newPhpUrl := strings.Replace(phpUrl, "localhost", "host.docker.internal", 1)
+					phpStatus, phpResult, phpErr = hitGetRequest(newPhpUrl, requestParam)
+					// phpStatus, phpResult, phpErr = hitGetRequest(phpUrl, requestParam)
 				}
 			} else if strings.ToUpper(requestParam["method"]) == "POST" {
 				delete(requestParam, "method")
@@ -289,6 +289,7 @@ func hitPostRequest(url string, params map[string]string) (int, any, error) {
 }
 
 func hitPostRequestNew(hiturl string, params map[string]string) (int, any, error) {
+	fmt.Println("new post request hiting", hiturl)
 	defer PanicHandler(true, false, "Panic error encountered in ApiPostPlainTextQueryFunction!")
 	jsonData := url.Values{}
 
