@@ -2,40 +2,73 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
 	database "github.com/ghostcode-sys/m/v2/Database"
+	handlers "github.com/ghostcode-sys/m/v2/Handlers"
 	routing "github.com/ghostcode-sys/m/v2/Routing"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	fmt.Println("Connection", os.Getenv("DBNAME"), os.Getenv("DB_URL"))
-	defer database.CloseConnection()
-
-	_, err := database.GetDatabaseConnection()
-
-	if err != nil {
-		fmt.Println("DB connection Failed")
-	}
-
 	if os.Getenv("DOCKER") != "yes" {
-		err = godotenv.Load()
+		err := godotenv.Load()
 		if err != nil {
-			fmt.Println(err.Error())
-			return
+			log.Fatal("Error loading .env file:", err)
 		}
 	}
 
-	r := routing.SetupRouter()
-	// Listen and Server in 0.0.0.0:8080
+	fmt.Println("Connection", os.Getenv("DBNAME"), os.Getenv("DB_URL"))
 
-	r.Static("Static/", "./Static")
+	client, err := database.GetDatabaseConnection()
+	if err != nil {
+		log.Fatal("DB connection Failed:", err) 
+	}
+	defer database.CloseConnection()
+
+	handlers.InitCollections(client)
+
+	r := routing.SetupRouter()
+
+	r.GET("/assets/*filepath", func(c *gin.Context) {
+		file := c.Param("filepath")
+		fullPath := "./Static/assets" + file
+
+		fmt.Println("Request for asset:", fullPath)
+
+		if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+			fmt.Println("File not found:", fullPath)
+			c.Status(404)
+			return
+		}
+
+		if strings.HasSuffix(file, ".css") {
+			c.Header("Content-Type", "text/css")
+		} else if strings.HasSuffix(file, ".js") {
+			c.Header("Content-Type", "application/javascript")
+		}
+
+		c.File(fullPath)
+	})
+
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./Static/index.html")
+	})
+
+	r.GET("/react", func(c *gin.Context) {
+		c.File("./Static/index.html")
+	})
+	r.GET("/old", func(c *gin.Context) {
+		c.File("./Frontend/index.html")
+	})
 	r.LoadHTMLGlob("Frontend/*")
 
-	if os.Getenv("DOCKER") != "yes" {
-		r.Run(":8081")
-	} else {
-		r.Run(":8081")
+	port := ":8081"
+	fmt.Printf("Server running on port %s\n", port)
+	if err := r.Run(port); err != nil {
+		log.Fatal("Server failed to start:", err)
 	}
 }
