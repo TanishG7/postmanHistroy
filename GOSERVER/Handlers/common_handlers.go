@@ -68,7 +68,7 @@ func GetReqInfoWithData(c *gin.Context) {
 			{Key: "createdAt", Value: bson.D{{Key: "$max", Value: "$timestamp"}}},
 		}}},
 		{{Key: "$project", Value: bson.D{
-			{Key: "endpoint", Value: "$_id"}, // Use the full URL as endpoint
+			{Key: "endpoint", Value: "$_id"},
 			{Key: "_id", Value: 0},
 			{Key: "count", Value: 1},
 			{Key: "allRequests", Value: 1},
