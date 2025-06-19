@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -53,19 +53,8 @@ func GetReqInfoWithData(c *gin.Context) {
 			{Key: "path", Value: "$reqDataDetails"},
 			{Key: "preserveNullAndEmptyArrays", Value: true},
 		}}},
-		{{Key: "$addFields", Value: bson.D{
-			{Key: "endpoint", Value: bson.D{
-				{Key: "$arrayElemAt", Value: bson.A{
-					bson.D{{Key: "$split", Value: bson.A{
-						"$requestUrl",
-						"v1/",
-					}}},
-					1,
-				}},
-			}},
-		}}},
 		{{Key: "$group", Value: bson.D{
-			{Key: "_id", Value: "$endpoint"},
+			{Key: "_id", Value: "$requestUrl"},
 			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 			{Key: "allRequests", Value: bson.D{
 				{Key: "$push", Value: bson.D{
@@ -79,7 +68,7 @@ func GetReqInfoWithData(c *gin.Context) {
 			{Key: "createdAt", Value: bson.D{{Key: "$max", Value: "$timestamp"}}},
 		}}},
 		{{Key: "$project", Value: bson.D{
-			{Key: "endpoint", Value: "$_id"},
+			{Key: "endpoint", Value: "$_id"}, // Use the full URL as endpoint
 			{Key: "_id", Value: 0},
 			{Key: "count", Value: 1},
 			{Key: "allRequests", Value: 1},

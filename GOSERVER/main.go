@@ -58,7 +58,7 @@ func main() {
 		c.File("./Static/index.html")
 	})
 
-	r.GET("/react", func(c *gin.Context) {
+	r.GET("/", func(c *gin.Context) {
 		c.File("./Static/index.html")
 	})
 	r.GET("/old", func(c *gin.Context) {
