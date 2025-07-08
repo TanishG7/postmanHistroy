@@ -2,7 +2,7 @@
 
 A streamlined solution that automatically converts Postman API collections into Swagger documentation in under 100 seconds, eliminating the traditional 15-minute manual process.
 
-## ✨ Features
+## Features
 
 - **MongoDB Storage**: Automatically stores all Postman requests and responses
 - **API Management Dashboard**: Browse, search, and select APIs from a centralized repository
@@ -10,7 +10,7 @@ A streamlined solution that automatically converts Postman API collections into 
 - **One-Click Swagger Generation**: Instantly convert your API collection to Swagger documentation
 - **Time Efficiency**: Reduces documentation time from 15 minutes to under 100 seconds per API
 
-## 🚀 How It Works
+## How It Works
 
 1. **Store**: Postman requests/responses are saved to MongoDB
 2. **Browse**: View all APIs in a searchable dashboard
